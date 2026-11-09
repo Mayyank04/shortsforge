@@ -235,13 +235,25 @@ def make_geo_storyboard(topic: str, duration: int = 75) -> Storyboard:
     research = generate_research_notes(topic)
 
     clean = topic.lower()
+    primary = ctx.primary_name.lower()
     matched_key = "gibraltar"
-    for k in GEO_SCRIPT_TEMPLATES:
-        if k in clean:
-            matched_key = k
-            break
+    if "kaliningrad" in primary or "russia" in clean:
+        matched_key = "kaliningrad"
+    elif "suez" in primary or "canal" in clean:
+        matched_key = "suez"
+    elif "ireland" in primary:
+        matched_key = "ireland"
+    elif "himalaya" in primary:
+        matched_key = "himalayas"
+    elif "gibraltar" in primary:
+        matched_key = "gibraltar"
+    else:
+        for k in GEO_SCRIPT_TEMPLATES:
+            if k in clean or k in primary:
+                matched_key = k
+                break
 
-    template = GEO_SCRIPT_TEMPLATES[matched_key]
+    template = GEO_SCRIPT_TEMPLATES.get(matched_key, GEO_SCRIPT_TEMPLATES["gibraltar"])
     raw_segments = template["segments"]
 
     # If duration requested is higher (e.g. 90-100s), scale the scene timing

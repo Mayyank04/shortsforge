@@ -123,14 +123,26 @@ def generate_research_notes(topic: str) -> GeoResearchResult:
     """Produces verified factual research notes and claims for the specified topic."""
     ctx = resolve_geo_context(topic)
     clean_topic = topic.lower()
+    primary = ctx.primary_name.lower()
 
     key = "gibraltar"
-    for k in VERIFIED_KNOWLEDGE_BASE:
-        if k in clean_topic:
-            key = k
-            break
+    if "kaliningrad" in primary or "russia" in clean_topic:
+        key = "kaliningrad"
+    elif "suez" in primary or "canal" in clean_topic:
+        key = "suez"
+    elif "ireland" in primary:
+        key = "ireland"
+    elif "himalaya" in primary:
+        key = "himalayas"
+    elif "gibraltar" in primary:
+        key = "gibraltar"
+    else:
+        for k in VERIFIED_KNOWLEDGE_BASE:
+            if k in clean_topic or k in primary:
+                key = k
+                break
 
-    data = VERIFIED_KNOWLEDGE_BASE[key]
+    data = VERIFIED_KNOWLEDGE_BASE.get(key, VERIFIED_KNOWLEDGE_BASE["gibraltar"])
 
     return GeoResearchResult(
         topic=topic,
