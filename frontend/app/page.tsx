@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 type Job = {
   id: string;
@@ -245,6 +246,13 @@ export default function Home() {
         >
           🌍 Geography Studio (Blender 3D)
         </button>
+        <Link
+          href="/minecraft"
+          className="tab-btn"
+          style={{ textDecoration: "none" }}
+        >
+          🎬 Minecraft Story Studio
+        </Link>
         <button
           className={`tab-btn ${activeTab === "classic" ? "active" : ""}`}
           onClick={() => {

@@ -10,8 +10,23 @@ def main():
     p.add_argument("--topic", required=False, help="Video topic to render directly")
     p.add_argument(
         "--style",
-        choices=["mixed", "2d", "3d", "geo_realistic", "geo_political", "geo_terrain", "geo_historical"],
         default="geo_realistic"
+    )
+    p.add_argument(
+        "--mode",
+        choices=["auto", "geo", "minecraft", "classic"],
+        default="auto",
+        help="Production mode: geo (GeoGlobeTales), minecraft (Minecraft Story Studio), classic (2D), or auto"
+    )
+    p.add_argument(
+        "--genre",
+        default="adventure",
+        help="Story genre for Minecraft mode (emotional, funny, mystery, adventure, survival, etc.)"
+    )
+    p.add_argument(
+        "--language",
+        default="en",
+        help="Narration language code ('en' for English, 'hi' for Hindi)"
     )
     p.add_argument("--duration", type=int, default=75)
     p.add_argument("--voice", default="heart", help="Kokoro voice (heart, adam, alice, george, etc.)")
@@ -21,6 +36,7 @@ def main():
     p.add_argument("--output-dir", default=os.getenv("OUTPUT_DIR", "outputs"))
     p.add_argument("--api-url", default=os.getenv("SHORTFORGE_API_URL", "http://127.0.0.1:8000"))
     p.add_argument("--job-id", help="Render a queued job already created in the dashboard")
+    p.add_argument("--project-id", help="Render a Minecraft story project by ID")
     args = p.parse_args()
 
     base = (args.api_url or "http://127.0.0.1:8000").rstrip("/")
@@ -43,11 +59,23 @@ def main():
             time.sleep(args.poll_interval)
         return
 
-    if not args.job_id and not args.topic:
-        p.error("Either --topic, --job-id, or --daemon must be provided")
+    if not args.job_id and not args.topic and not args.project_id:
+        p.error("Either --topic, --job-id, --project-id, or --daemon must be provided")
 
     if args.job_id:
         process_single_job(args.job_id, base, args.output_dir, preview=args.preview)
+    elif args.mode == "minecraft" or args.style.startswith("minecraft"):
+        from .minecraft.pipeline import render_minecraft_video
+        path, meta = render_minecraft_video(
+            topic=args.topic or "The Villager Who Had Only One Heart",
+            genre=args.genre,
+            duration=args.duration if args.duration != 75 else 50,
+            voice=args.voice,
+            language=args.language,
+            preview=args.preview,
+            output_dir=args.output_dir
+        )
+        print(f"Rendered Minecraft Video: {path}")
     else:
         path, meta = render(
             topic=args.topic,

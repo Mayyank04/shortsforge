@@ -15,6 +15,25 @@ def render(
     voice: str = "heart",
     preview: bool = False
 ):
+    # Route Minecraft styles or topics directly to the Minecraft Story Studio engine
+    is_minecraft = (
+        style.startswith("minecraft") or
+        any(k in topic.lower() for k in ["minecraft", "villager", "one heart", "creeper", "iron golem", "nether", "steve"])
+    )
+    if is_minecraft:
+        from .minecraft.pipeline import render_minecraft_video
+        genre = style.replace("minecraft_", "") if style.startswith("minecraft_") else "adventure"
+        if genre == "minecraft":
+            genre = "adventure"
+        return render_minecraft_video(
+            topic=topic,
+            genre=genre,
+            duration=duration,
+            voice=voice,
+            preview=preview,
+            output_dir=output_dir
+        )
+
     # Route geography styles or geography topics directly to the GeoGlobeTales engine
     is_geo_topic = (
         style.startswith("geo") or
