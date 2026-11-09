@@ -49,12 +49,18 @@ API docs: http://127.0.0.1:8000/docs
 ```bash
 source .venv/bin/activate
 
-# Render the benchmark video:
+# Fast preview mode (540x960, ~30s):
+python -m worker.cli --topic "Why is Gibraltar British?" --preview --duration 30
+
+# Full production render (1080x1920, 30 FPS, ~75s):
 python -m worker.cli --topic "Why is Gibraltar British?" --style geo_realistic --duration 75 --voice heart
 
 # Or run the worker in continuous background daemon mode:
 python -m worker.cli --daemon
 ```
+
+### Kaggle GPU Execution:
+Open [`notebooks/shortforge_kaggle.ipynb`](notebooks/shortforge_kaggle.ipynb) in Kaggle, toggle Internet **ON**, select a GPU accelerator (T4 or P100), and execute the notebook cells sequentially to render videos directly in the cloud and download the output ZIP.
 
 ### Terminal 3 — Next.js Dashboard:
 ```bash
