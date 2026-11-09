@@ -142,3 +142,4 @@ def generate_research_notes(topic: str) -> GeoResearchResult:
         strategic_importance=data["strategic_importance"],
         key_entities=data["key_entities"]
     )
+

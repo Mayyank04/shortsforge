@@ -287,3 +287,4 @@ bpy.ops.render.render(write_still=True)
             pass
 
     return output_path
+

@@ -138,3 +138,4 @@ def validate_output_video(
         "video_codec": video_stream.get("codec_name"),
         "audio_codec": audio_stream.get("codec_name")
     }
+

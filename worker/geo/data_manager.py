@@ -165,3 +165,4 @@ def load_populated_places_geojson() -> dict:
         ensure_geo_assets()
     with open(dest, "r", encoding="utf-8") as f:
         return json.load(f)
+

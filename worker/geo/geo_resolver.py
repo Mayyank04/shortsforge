@@ -313,3 +313,4 @@ def resolve_geo_context(topic: str) -> GeoContext:
         historical_notes=spec["historical_notes"],
         strategic_summary=spec["strategic_summary"],
     )
+

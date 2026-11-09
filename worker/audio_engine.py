@@ -138,3 +138,4 @@ def mix_master_audio(
     ]
     subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     return output_audio
+

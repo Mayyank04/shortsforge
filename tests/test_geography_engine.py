@@ -155,3 +155,4 @@ def test_api_get_job_logs():
     data = r_logs.json()
     assert data["id"] == job_id
     assert "status" in data
+

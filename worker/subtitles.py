@@ -194,3 +194,4 @@ def render_scene_overlay(
         im.convert("RGB").save(output_path, quality=95)
 
     return im
+

@@ -309,3 +309,4 @@ def make_geo_storyboard(topic: str, duration: int = 75) -> Storyboard:
         scenes=scenes,
         geo_context=ctx
     )
+
