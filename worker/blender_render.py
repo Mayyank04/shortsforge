@@ -4,8 +4,11 @@ Constructs 3D Earth globe, shaders, 3D pins, 3D flags, terrain bumps, and render
 """
 from __future__ import annotations
 import os
+import sys
 import json
 import math
+import shutil
+import glob
 import subprocess
 import tempfile
 from pathlib import Path
@@ -13,7 +16,118 @@ from PIL import Image, ImageDraw
 from .geo.geo_resolver import GeoContext, LandmarkPin, TradeRoute, CountryHighlight
 from .geo.data_manager import BASE_DIR, GEO_DIR, TEXTURES_DIR, ensure_geo_assets
 
-BLENDER_BIN = "/opt/homebrew/bin/blender"
+class BlenderRenderError(RuntimeError):
+    """Raised when Blender rendering fails or exits with a non-zero status."""
+    def __init__(self, message: str, returncode: int | None = None, stdout: str = "", stderr: str = ""):
+        super().__init__(message)
+        self.returncode = returncode
+        self.stdout = stdout
+        self.stderr = stderr
+
+def find_blender_binary() -> Path:
+    """
+    Finds the Blender executable across macOS, Linux (Kaggle/cloud), and Windows.
+    Resolution order:
+    1. BLENDER_BIN environment variable
+    2. shutil.which("blender")
+    3. Platform-specific known paths:
+       - macOS:
+         /Applications/Blender.app/Contents/MacOS/Blender
+         /opt/homebrew/bin/blender
+         /usr/local/bin/blender
+         ~/Applications/Blender.app/Contents/MacOS/Blender
+       - Linux:
+         /usr/bin/blender
+         /usr/local/bin/blender
+         /snap/bin/blender
+         /kaggle/working/blender/blender
+         /opt/blender/blender
+       - Windows:
+         %PROGRAMFILES%\\Blender Foundation\\Blender *\\blender.exe
+         %LOCALAPPDATA%\\Programs\\Blender Foundation\\Blender *\\blender.exe
+    Raises FileNotFoundError if Blender executable cannot be found.
+    """
+    # 1. Environment variable override
+    env_bin = os.getenv("BLENDER_BIN")
+    if env_bin:
+        p = Path(env_bin).expanduser().resolve()
+        if p.is_file() and (os.name == "nt" or os.access(p, os.X_OK)):
+            return p
+        raise FileNotFoundError(
+            f"BLENDER_BIN environment variable is set to '{env_bin}', but the file does not exist or is not executable."
+        )
+
+    # 2. PATH lookup
+    which_bin = shutil.which("blender")
+    if which_bin:
+        p = Path(which_bin).resolve()
+        if p.is_file():
+            return p
+
+    # 3. Platform candidate search
+    candidates: list[Path] = []
+    if sys.platform == "darwin":
+        candidates.extend([
+            Path("/Applications/Blender.app/Contents/MacOS/Blender"),
+            Path("/opt/homebrew/bin/blender"),
+            Path("/usr/local/bin/blender"),
+            Path.home() / "Applications/Blender.app/Contents/MacOS/Blender",
+        ])
+    elif sys.platform.startswith("linux"):
+        candidates.extend([
+            Path("/usr/bin/blender"),
+            Path("/usr/local/bin/blender"),
+            Path("/snap/bin/blender"),
+            Path("/kaggle/working/blender/blender"),
+            Path("/opt/blender/blender"),
+        ])
+    elif sys.platform == "win32":
+        for pf_var in ["PROGRAMFILES", "PROGRAMFILES(X86)"]:
+            pf = os.getenv(pf_var)
+            if pf:
+                candidates.extend(Path(pf).glob("Blender Foundation/Blender */blender.exe"))
+        local_app = os.getenv("LOCALAPPDATA")
+        if local_app:
+            candidates.extend(Path(local_app).glob("Programs/Blender Foundation/Blender */blender.exe"))
+
+    for c in candidates:
+        if c.is_file() and (sys.platform == "win32" or os.access(c, os.X_OK)):
+            return c if sys.platform == "win32" else c.resolve()
+
+    raise FileNotFoundError(
+        "Blender executable not found. Please install Blender or set the BLENDER_BIN environment variable."
+    )
+
+def get_blender_version(blender_path: Path | str | None = None) -> str:
+    """Executes blender --version and returns the first line (e.g. 'Blender 5.2.3 LTS')."""
+    bin_path = Path(blender_path) if blender_path else find_blender_binary()
+    try:
+        res = subprocess.run(
+            [str(bin_path), "--version"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=15,
+            check=True
+        )
+        lines = [line.strip() for line in res.stdout.strip().splitlines() if line.strip()]
+        return lines[0] if lines else "Unknown Blender Version"
+    except Exception as exc:
+        raise BlenderRenderError(f"Failed to query Blender version from {bin_path}: {exc}") from exc
+
+def verify_blender_available() -> tuple[Path, str]:
+    """Verifies that Blender is installed, executable, and can report its version."""
+    bin_path = find_blender_binary()
+    version = get_blender_version(bin_path)
+    return bin_path, version
+
+def _resolve_default_blender_bin() -> str:
+    try:
+        return str(find_blender_binary())
+    except FileNotFoundError:
+        return "blender"
+
+BLENDER_BIN = _resolve_default_blender_bin()
 
 def geo_to_pixel(lon: float, lat: float, width: int = 4096, height: int = 2048) -> tuple[int, int]:
     """Converts (lon, lat) to equirectangular pixel coordinates."""
@@ -82,11 +196,14 @@ def render_blender_scene(
     output_path: Path,
     width: int = 1080,
     height: int = 1920,
-    preview: bool = False
+    preview: bool = False,
+    blender_bin: str | Path | None = None
 ) -> Path:
     """
     Invokes Blender headlessly via a Python sub-script to render the 3D scene.
+    Supports macOS, Linux (Kaggle), and Windows.
     """
+    bin_to_use = Path(blender_bin) if blender_bin else find_blender_binary()
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     bump_path = TEXTURES_DIR / "earth_bump_4k.jpg"
@@ -103,11 +220,11 @@ def render_blender_scene(
     blender_payload = {
         "width": width // 2 if preview else width,
         "height": height // 2 if preview else height,
-        "texture_path": str(texture_path.resolve()),
-        "bump_path": str(bump_path.resolve()) if bump_path.exists() else None,
-        "water_path": str(water_path.resolve()) if water_path.exists() else None,
-        "flag_path": str(Path(flag_path).resolve()) if flag_path and Path(flag_path).exists() else None,
-        "output_path": str(output_path.resolve()),
+        "texture_path": Path(texture_path).resolve().as_posix(),
+        "bump_path": Path(bump_path).resolve().as_posix() if bump_path.exists() else None,
+        "water_path": Path(water_path).resolve().as_posix() if water_path.exists() else None,
+        "flag_path": Path(flag_path).resolve().as_posix() if flag_path and Path(flag_path).exists() else None,
+        "output_path": Path(output_path).resolve().as_posix(),
         "lat": scene_spec_dict.get("lat", 36.14),
         "lon": scene_spec_dict.get("lon", -5.35),
         "camera_distance": scene_spec_dict.get("camera_distance", 2.4),
@@ -274,12 +391,31 @@ bpy.ops.render.render(write_still=True)
         script_file = tf.name
 
     try:
-        subprocess.run(
-            [BLENDER_BIN, "-b", "--python", script_file],
-            check=True,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.PIPE
+        proc = subprocess.run(
+            [str(bin_to_use), "-b", "--python", script_file],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=180
         )
+        if proc.returncode != 0:
+            err_tail = "\\n".join(proc.stderr.strip().splitlines()[-25:])
+            out_tail = "\\n".join(proc.stdout.strip().splitlines()[-25:])
+            raise BlenderRenderError(
+                f"Blender failed with exit code {proc.returncode}.\\n"
+                f"Stderr tail:\\n{err_tail}\\n"
+                f"Stdout tail:\\n{out_tail}",
+                returncode=proc.returncode,
+                stdout=proc.stdout,
+                stderr=proc.stderr
+            )
+        if not output_path.exists() or output_path.stat().st_size == 0:
+            raise BlenderRenderError(
+                f"Blender completed with exit code 0 but target file was not created: {output_path}",
+                returncode=0,
+                stdout=proc.stdout,
+                stderr=proc.stderr
+            )
     finally:
         try:
             os.remove(script_file)
