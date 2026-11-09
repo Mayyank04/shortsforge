@@ -1,0 +1,73 @@
+*{box-sizing:border-box}
+body{margin:0;background:#090d18;color:#f5f7fb;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+main{max-width:1120px;margin:0 auto;padding:40px 24px}
+.eyebrow{color:#f5c84c;font-weight:700;letter-spacing:.12em;font-size:12px;display:flex;justify-content:space-between;align-items:center}
+.api-pill{font-size:11px;padding:4px 10px;border-radius:12px;font-weight:600;letter-spacing:0}
+.api-online{background:rgba(46,213,115,0.15);color:#2ed573;border:1px solid rgba(46,213,115,0.3)}
+.api-offline{background:rgba(255,71,87,0.15);color:#ff4757;border:1px solid rgba(255,71,87,0.3)}
+h1{font-size:clamp(32px,5vw,54px);margin:12px 0;line-height:1.15;letter-spacing:-0.02em}
+p{color:#aeb8cc;line-height:1.6}
+
+/* Studio Tabs */
+.tabs-nav{display:flex;gap:12px;margin:28px 0 10px;border-bottom:1px solid #26334b;padding-bottom:12px}
+.tab-btn{background:transparent;color:#94a3b8;border:1px solid transparent;padding:10px 18px;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .2s;margin-top:0}
+.tab-btn:hover{color:#fff;background:rgba(255,255,255,0.05)}
+.tab-btn.active{background:#1e293b;color:#f5c84c;border-color:#38bdf8;box-shadow:0 0 16px rgba(56,189,248,0.15)}
+
+.panel{background:#121a2b;border:1px solid #26334b;border-radius:20px;padding:26px;margin-top:20px}
+label{display:block;margin:14px 0 8px;color:#dce4f3;font-weight:600;font-size:14px}
+input,select,textarea{width:100%;background:#0b1220;color:#fff;border:1px solid #34435d;border-radius:10px;padding:14px;font-size:15px;outline:none;font-family:inherit}
+input:focus,select:focus,textarea:focus{border-color:#f5c84c;box-shadow:0 0 0 2px rgba(245,200,76,0.2)}
+
+/* Preset chips */
+.presets-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chip{background:#1a2336;color:#cbd5e1;border:1px solid #334155;border-radius:20px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
+.chip:hover{background:#38bdf8;color:#090d18;border-color:#38bdf8}
+
+/* Form row layout */
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.toggle-row{display:flex;align-items:center;gap:12px;margin-top:16px;background:#0d1424;padding:12px 16px;border-radius:10px;border:1px solid #26334b}
+.toggle-row input[type="checkbox"]{width:auto;cursor:pointer}
+
+button.primary{margin-top:22px;background:#f5c84c;color:#151515;border:0;padding:14px 26px;border-radius:10px;font-weight:800;font-size:15px;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:8px}
+button.primary:hover{background:#ffd464;transform:translateY(-1px)}
+button.secondary{margin-top:22px;background:#1e293b;color:#f8fafc;border:1px solid #475569;padding:14px 20px;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;margin-left:10px}
+button.secondary:hover{background:#334155}
+button:disabled{opacity:.5;cursor:wait;transform:none}
+
+/* Job Cards */
+.job{border-top:1px solid #26334b;padding:22px 0;display:flex;flex-direction:column;gap:14px}
+.job-header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.job-title{font-size:18px;color:#f0f4fc;font-weight:700;line-height:1.3}
+.status-badge{font-size:11px;font-weight:800;padding:4px 12px;border-radius:20px;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+.status-queued{background:rgba(245,200,76,0.16);color:#f5c84c;border:1px solid rgba(245,200,76,0.4)}
+.status-running,.status-rendering_3d,.status-scripting,.status-generating_voice{background:rgba(56,189,248,0.16);color:#38bdf8;border:1px solid rgba(56,189,248,0.4)}
+.status-completed{background:rgba(46,213,115,0.16);color:#2ed573;border:1px solid rgba(46,213,115,0.4)}
+.status-failed{background:rgba(255,71,87,0.16);color:#ff4757;border:1px solid rgba(255,71,87,0.4)}
+.status-cancelled{background:rgba(148,163,184,0.16);color:#94a3b8;border:1px solid rgba(148,163,184,0.4)}
+
+.job-actions{display:flex;gap:8px;margin-top:6px}
+.action-btn{padding:6px 12px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;background:#1e293b;border:1px solid #334155;color:#e2e8f0;margin-top:0}
+.action-btn:hover{background:#334155;color:#fff}
+.action-btn.danger{color:#f87171;border-color:rgba(248,113,113,0.3)}
+.action-btn.danger:hover{background:rgba(248,113,113,0.15)}
+
+/* Video Preview Container */
+.video-preview-box{display:flex;flex-wrap:wrap;gap:20px;background:#090e1a;padding:18px;border-radius:14px;border:1px solid #233149;margin-top:8px}
+.video-player{max-width:280px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.5);border:1px solid #334155;background:#000}
+.video-meta{flex:1;min-width:260px}
+.video-meta h4{margin:0 0 8px;color:#f5c84c;font-size:15px}
+.meta-badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.m-badge{font-size:11px;padding:3px 8px;border-radius:6px;background:#1e293b;color:#cbd5e1;border:1px solid #334155}
+
+/* Storyboard cards */
+.storyboard-scroll{display:flex;gap:12px;overflow-x:auto;padding-bottom:12px;margin-top:10px}
+.scene-card{min-width:220px;background:#0b111e;border:1px solid #25334d;border-radius:10px;padding:12px;font-size:12px}
+.scene-card-header{display:flex;justify-content:space-between;font-weight:700;color:#f5c84c;margin-bottom:6px}
+.scene-card-region{color:#38bdf8;font-weight:600;margin-bottom:4px}
+.scene-card-narr{color:#cbd5e1;line-height:1.4}
+
+.muted{font-size:13px;color:#8290a8}
+.job-cmd{background:#0b111e;border:1px solid #25334d;padding:8px 12px;border-radius:8px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px;color:#c3d2ec;display:flex;align-items:center;justify-content:space-between;gap:8px;overflow-x:auto}
+.job-error{background:rgba(255,71,87,0.1);border:1px solid rgba(255,71,87,0.3);color:#ff8793;padding:10px 14px;border-radius:8px;font-size:13px;font-family:monospace}
+.job-output{background:rgba(46,213,115,0.1);border:1px solid rgba(46,213,115,0.3);color:#85f5af;padding:10px 14px;border-radius:8px;font-size:13px}

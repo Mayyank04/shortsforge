@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+.pytest_cache/
+.env
+.env.local
+*.db
+outputs/*
+!outputs/.gitkeep
+node_modules/
+.next/
+.DS_Store
+assets/geo/textures/*.jpg
+assets/geo/textures/*.png
+assets/geo/data/*.geojson
+assets/audio/*.wav
